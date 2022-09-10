@@ -43,6 +43,29 @@ async function main() {
     
     console.log("The new account balance is: " +accountBalance.bhars.toTinybars() + "tinybar.");
 
+    //Create the transfer transaction
+    const sendHbar = await new TransferTransaction()
+        .addHbarTransfer(myAccountId, Hbar.fromTinybars(-1000)) //Sending account
+        .addHbarTransfer(newAccountId, Hbar.fromTinybars(1000)) //Receiving account
+        .execute(client);
+
+    //Verify the transaction reached consensus
+    const transactionReceipt = await sendHbar.getReceipt(client);
+    console.log("The transfer transaction from my account was: " + transactionReceipt.status.toString());
+
+    //Request the cost of the query
+    const queryCost = await new AccountBalanceQuery()
+        .setAccountId(newAccountId)
+        .getCost(client);
+
+    console.log("The cost of query is: " +queryCost);
+
+    //Check the new account's balance
+    const getNewBalance = await new AccountBalanceQuery()
+        .setAccountId(newAccountId)
+        .execute(client);
+
+    console.log("The account balance after the transfer is: " +getNewBalance.hbars.toTinybars() +"tinybar.")
 
 }
 main();
